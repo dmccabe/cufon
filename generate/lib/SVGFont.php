@@ -70,6 +70,13 @@ class SVGFont {
 
 				$family = $this->options['family'];
 
+				// if no family name was provided and the PS name option was specified, override the value with the
+				// ID, which contains the PS name
+				if (!empty($this->options['usePsNameAsFamily']) && (is_null($family) || $family == ''))
+				{
+					$family = $this->id;
+				}
+
 				if (!is_null($family) && $family !== '')
 				{
 					return trim($family);

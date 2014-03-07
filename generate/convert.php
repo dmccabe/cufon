@@ -32,6 +32,13 @@ Options:
 
                         Example: -n "Nifty Font"
 
+  -p  --ps-as-family    Use the PostScript name of the font as the
+                        font-family. Any specific family name set will
+                        take priority over this option. This option is
+                        included for compatibility with applications like
+                        Adobe Illustrator that output the PostScript name
+                        as the family name.
+
   -u  --unicode-range   See http://www.w3.org/TR/css3-webfonts/#dataqual
 
                         Example: -u "U+00??,U+20A7"
@@ -69,6 +76,9 @@ $filters = array(
 	'family' => array(
 		'filter' => FILTER_SANITIZE_STRING,
 		'flags' => FILTER_NULL_ON_FAILURE
+	),
+	'usePsNameAsFamily' => array(
+		'filter' => FILTER_VALIDATE_BOOLEAN
 	),
 	'terms' => array(
 		'filter' => FILTER_VALIDATE_BOOLEAN,
@@ -151,10 +161,15 @@ switch (PHP_SAPI)
 {
 	case 'cli':
 
-		$fontforge = trim(`which fontforge`);
+		if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+			$fontforge = trim(`which fontforge`);
+		} else {
+			$fontforge = trim(`where fontforge`);
+		}
 
 		$options = array(
 			'family' => '',
+			'usePsNameAsFamily' => 'no',
 			'terms' => 'yes',
 			'permission' => 'yes',
 			'glyphs' => array(),
@@ -202,6 +217,10 @@ switch (PHP_SAPI)
 				case '-n':
 				case '--family-name':
 					$options['family'] = next($args);
+					break;
+				case '-p':
+				case '--ps-as-family':
+					$options['usePsNameAsFamily'] = 'yes';
 					break;
 				case '-u':
 				case '--unicode-range':
